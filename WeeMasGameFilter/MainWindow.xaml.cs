@@ -35,14 +35,12 @@ namespace WeeMasGameFilter
         private string CLIENT_SECRET = "xQf3e8Ozy3dgjwJT3CJ1a28V";
         private string SCOPE = "https://spreadsheets.google.com/feeds";
         private string REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
-        private Uri m_AuthUri;
         private OAuth2Parameters parameters;
         private SpreadsheetsService service;
 
-        private string m_GameListText;
+        private ObservableCollection<WeeMasGameEntry> m_GameList;
         private string m_WeeMasURL;
         private string m_GameCollectionFilePath;
-        private List<string> m_WeeMasGames;
 
         public MainWindow()
         {
@@ -69,42 +67,14 @@ namespace WeeMasGameFilter
                 GOAuth2RequestFactory requestFactory = new GOAuth2RequestFactory(null, "WeeMasGameList", parameters);
                 service = new SpreadsheetsService("WeeMasGameList");
                 service.RequestFactory = requestFactory;
-
-                //WorksheetQuery query2 = new WorksheetQuery("1JU7BwpP47sE62wFO79B7ZXhG56h0Mj393eYqRmUZH2s", "private", "basic");
-                //WorksheetFeed feed2 = service.Query(query2);
-
-                //if (feed2.Entries.Count == 0)
-                //{
-                //    // TODO: There were no spreadsheets, act accordingly.
-                //}
-                //WorksheetEntry worksheet = (WorksheetEntry)feed2.Entries[0];
-                //AtomLink listFeedLink = worksheet.Links.FindService(GDataSpreadsheetsNameTable.ListRel, null);
-                //ListQuery listQuery = new ListQuery(listFeedLink.HRef.ToString());
-                //ListFeed listFeed = service.Query(listQuery);
-                //foreach (ListEntry row in listFeed.Entries)
-                //{
-                //    Console.WriteLine(row.Title.Text);
-                //}
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Authentication failed: " + ex.Message, "Error");
             }
-            m_WeeMasGames = new List<string>();
+            m_GameList = new ObservableCollection<WeeMasGameEntry>();
             InitializeComponent();
-        }
-
-        public string GameListText
-        {
-            get { return m_GameListText; }
-            set
-            {
-                if (m_GameListText != value)
-                {
-                    m_GameListText = value;
-                    NotifyPropertyChanged("GameListText");
-                }
-            }
+            WeeMasURL = "https://docs.google.com/spreadsheets/d/1JU7BwpP47sE62wFO79B7ZXhG56h0Mj393eYqRmUZH2s/";
         }
 
         public string WeeMasURL
@@ -133,6 +103,19 @@ namespace WeeMasGameFilter
             }
         }
 
+        public ObservableCollection<WeeMasGameEntry> GameList
+        {
+            get { return m_GameList; }
+            set
+            {
+                if (m_GameList != value)
+                {
+                    m_GameList = value;
+                    NotifyPropertyChanged("GameList");
+                }
+            }
+        }
+
         private void DownloadButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -145,7 +128,8 @@ namespace WeeMasGameFilter
                     if (segment == "d/")
                     {
                         key = uri.Segments[i + 1];
-                        key = key.Remove(key.Length - 1);
+                        if (key.EndsWith("/"))
+                            key = key.Remove(key.Length - 1);
                         break;
                     }
                 }
@@ -162,21 +146,27 @@ namespace WeeMasGameFilter
                 AtomLink listFeedLink = worksheet.Links.FindService(GDataSpreadsheetsNameTable.ListRel, null);
                 ListQuery listQuery = new ListQuery(listFeedLink.HRef.ToString());
                 ListFeed listFeed = service.Query(listQuery);
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine("WeeMas completed games:");
-                foreach (ListEntry row in listFeed.Entries)
+                for (int i = 0; i < listFeed.Entries.Count; i++)
                 {
-                    m_WeeMasGames.Add(row.Title.Text);
-                    sb.AppendLine(row.Title.Text);
+                    var row = listFeed.Entries[i];
+                    if (i >= m_GameList.Count)
+                    {
+                        GameList.Add(new WeeMasGameEntry()
+                        {
+                            WeeMasName = row.Title.Text
+                        });
+                    }
+                    else
+                    {
+                        GameList[i].WeeMasName = row.Title.Text;
+                    }
                 }
-                GameListText = sb.ToString();
             }
             catch
             {
                 MessageBox.Show("Invalid URL. Please copy the link from the address bar in your browser after opening the spreadsheet in Google Docs.");
                 return;
             }
-            MessageBox.Show("URL seems valid");
         }
 
         private string BuildConnectionString(string key)

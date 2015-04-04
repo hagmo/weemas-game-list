@@ -8,18 +8,21 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
+        
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
+            
             <StackPanel Grid.Column="0">
                 <TextBlock Text="URL to Winter-een-mas completed games list (Google Spreadsheet):"/>
-                <DockPanel Grid.Column="0">
-                    <Button DockPanel.Dock="Right" Click="DownloadButton_Click">Download games list...</Button>
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" Click="DownloadButton_Click">Download data</Button>
                     <TextBox DockPanel.Dock="Left" Text="{Binding WeeMasURL}"/>
                 </DockPanel>
             </StackPanel>
+            
             <StackPanel Grid.Column="1">
                 <TextBlock Text="Path to Wellman's game collection list:"/>
                 <DockPanel Grid.Column="0">
@@ -29,10 +32,15 @@
             </StackPanel>
         </Grid>
         <DockPanel Grid.Row="1">
-            <Button DockPanel.Dock="Top">Go!</Button>
-            <TextBlock DockPanel.Dock="Top" Text="List of games not present in the Wee-mas list:"/>
-            <TextBox AcceptsReturn="True" TextWrapping="Wrap" Text="{Binding GameListText}" />
+            <Button DockPanel.Dock="Bottom" Height="50">Transmute! Bombs away! Energize! Pimmel!</Button>
+            <ListView DockPanel.Dock="Top" ItemsSource="{Binding GameList}">
+                <ListView.View>
+                    <GridView AllowsColumnReorder="True">
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=WeeMasName}" Header="Wee-mas name"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding Path=WellmanName}" Header="Wellman's name"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
         </DockPanel>
-        
     </Grid>
 </Window>
