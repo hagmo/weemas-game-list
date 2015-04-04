@@ -1,0 +1,38 @@
+﻿<Window x:Class="WeeMasGameFilter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Wellman's Wee-mas Game Filter" Height="600" Width="800"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="URL to Winter-een-mas completed games list (Google Spreadsheet):"/>
+                <DockPanel Grid.Column="0">
+                    <Button DockPanel.Dock="Right" Click="DownloadButton_Click">Download games list...</Button>
+                    <TextBox DockPanel.Dock="Left" Text="{Binding WeeMasURL}"/>
+                </DockPanel>
+            </StackPanel>
+            <StackPanel Grid.Column="1">
+                <TextBlock Text="Path to Wellman's game collection list:"/>
+                <DockPanel Grid.Column="0">
+                    <Button DockPanel.Dock="Right" Click="BrowseButton_Click">Browse...</Button>
+                    <TextBox DockPanel.Dock="Left" Text="{Binding GameCollectionFilePath}"/>
+                </DockPanel>
+            </StackPanel>
+        </Grid>
+        <DockPanel Grid.Row="1">
+            <Button DockPanel.Dock="Top">Go!</Button>
+            <TextBlock DockPanel.Dock="Top" Text="List of games not present in the Wee-mas list:"/>
+            <TextBox AcceptsReturn="True" TextWrapping="Wrap" Text="{Binding GameListText}" />
+        </DockPanel>
+        
+    </Grid>
+</Window>
