@@ -20,11 +20,16 @@ using System.Net;
 using Google.GData.Client;
 using Google.GData.Spreadsheets;
 using System.Collections.ObjectModel;
+using System.Data.OleDb;
+using System.Data;
+using System.IO;
+using Excel;
 
 namespace WeeMasGameFilter
 
-    //https://docs.google.com/spreadsheet/ccc?key=0AuDUStfkpJTBdGIxcE5nU3hqejdEUm1VcWVDSnk1ZGc&usp=drive_web#gid=0
-//https://spreadsheets.google.com/tq?&tq=&key=0AuDUStfkpJTBdGIxcE5nU3hqejdEUm1VcWVDSnk1ZGc&gid=2
+//För att jämföra titlar: översätt till arabiska siffror, ta bort alla skiljetecken, ta bort allt inom parentes i wellmans lista, make lowercase
+    //hitta alla perfekta matchningar
+    //något smart med operfekta matchningar...
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -180,7 +185,52 @@ namespace WeeMasGameFilter
         private void BrowseButton_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Filter = "Excel OpenXML Files (*.xlsx)|*.xlsx";
             dialog.ShowDialog();
+            if (dialog.FileName != null && dialog.FileName != string.Empty)
+            {
+                FileStream stream = File.Open(dialog.FileName, FileMode.Open, FileAccess.Read);
+                IExcelDataReader excelReader = ExcelReaderFactory.CreateOpenXmlReader(stream);
+
+                List<int> gameNameColumns = new List<int>();
+                int row = 0;
+                int firstGameNameRow = int.MaxValue;
+                int gameListIndex = 0;
+                while (excelReader.Read())
+                {
+                    for (int column = 0; column < excelReader.FieldCount; column++)
+                    {
+                        //Remember all columns that have "Spel", since those contain the game names.
+                        string data = excelReader.GetString(column);
+                        if (row < firstGameNameRow && data == "Spel")
+                        {
+                            gameNameColumns.Add(column);
+                            firstGameNameRow = row + 1;
+                        }
+                        else if (row >= firstGameNameRow)
+                        {
+                            //If we're inside the section with game names, save all fields in the columns that had "Spel" at the top
+                            if (data != null && gameNameColumns.Contains(column))
+                            {
+                                if (gameListIndex >= GameList.Count)
+                                {
+                                    GameList.Add(new WeeMasGameEntry()
+                                        {
+                                            WellmanName = data
+                                        });
+                                    gameListIndex++;
+                                }
+                                else
+                                {
+                                    GameList[gameListIndex++].WellmanName = data;
+                                }
+                            }
+                        }
+                    }
+                    row++;
+                }
+                excelReader.Close();
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
