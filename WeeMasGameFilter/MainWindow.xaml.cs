@@ -26,10 +26,6 @@ using System.IO;
 using Excel;
 
 namespace WeeMasGameFilter
-
-//För att jämföra titlar: översätt till arabiska siffror, ta bort alla skiljetecken, ta bort allt inom parentes i wellmans lista, make lowercase
-    //hitta alla perfekta matchningar
-    //något smart med operfekta matchningar...
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -46,6 +42,9 @@ namespace WeeMasGameFilter
         private ObservableCollection<WeeMasGameEntry> m_GameList;
         private string m_WeeMasURL;
         private string m_GameCollectionFilePath;
+
+        private ObservableCollection<string> m_WeemasNames;
+        private ObservableCollection<string> m_WellmanNames;
 
         public MainWindow()
         {
@@ -78,6 +77,8 @@ namespace WeeMasGameFilter
                 MessageBox.Show("Authentication failed: " + ex.Message, "Error");
             }
             m_GameList = new ObservableCollection<WeeMasGameEntry>();
+            m_WeemasNames = new ObservableCollection<string>();
+            m_WellmanNames = new ObservableCollection<string>();
             InitializeComponent();
             WeeMasURL = "https://docs.google.com/spreadsheets/d/1JU7BwpP47sE62wFO79B7ZXhG56h0Mj393eYqRmUZH2s/";
         }
@@ -121,6 +122,32 @@ namespace WeeMasGameFilter
             }
         }
 
+        public ObservableCollection<string> WeemasNames
+        {
+            get { return m_WeemasNames; }
+            set
+            {
+                if (m_WeemasNames != value)
+                {
+                    m_WeemasNames = value;
+                    NotifyPropertyChanged("WeemasNames");
+                }
+            }
+        }
+
+        public ObservableCollection<string> WellmanNames
+        {
+            get { return m_WellmanNames; }
+            set
+            {
+                if (m_WellmanNames != value)
+                {
+                    m_WellmanNames = value;
+                    NotifyPropertyChanged("WellmanNames");
+                }
+            }
+        }
+
         private void DownloadButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -147,6 +174,8 @@ namespace WeeMasGameFilter
                 WorksheetQuery query = new WorksheetQuery(key, "private", "basic");
                 WorksheetFeed feed = service.Query(query);
 
+                WeemasNames.Clear();
+
                 WorksheetEntry worksheet = (WorksheetEntry)feed.Entries[0];
                 AtomLink listFeedLink = worksheet.Links.FindService(GDataSpreadsheetsNameTable.ListRel, null);
                 ListQuery listQuery = new ListQuery(listFeedLink.HRef.ToString());
@@ -154,17 +183,7 @@ namespace WeeMasGameFilter
                 for (int i = 0; i < listFeed.Entries.Count; i++)
                 {
                     var row = listFeed.Entries[i];
-                    if (i >= m_GameList.Count)
-                    {
-                        GameList.Add(new WeeMasGameEntry()
-                        {
-                            WeeMasName = row.Title.Text
-                        });
-                    }
-                    else
-                    {
-                        GameList[i].WeeMasName = row.Title.Text;
-                    }
+                    WeemasNames.Add(row.Title.Text);
                 }
             }
             catch
@@ -189,13 +208,14 @@ namespace WeeMasGameFilter
             dialog.ShowDialog();
             if (dialog.FileName != null && dialog.FileName != string.Empty)
             {
+                WellmanNames.Clear();
+
                 FileStream stream = File.Open(dialog.FileName, FileMode.Open, FileAccess.Read);
                 IExcelDataReader excelReader = ExcelReaderFactory.CreateOpenXmlReader(stream);
 
                 List<int> gameNameColumns = new List<int>();
                 int row = 0;
                 int firstGameNameRow = int.MaxValue;
-                int gameListIndex = 0;
                 while (excelReader.Read())
                 {
                     for (int column = 0; column < excelReader.FieldCount; column++)
@@ -212,18 +232,7 @@ namespace WeeMasGameFilter
                             //If we're inside the section with game names, save all fields in the columns that had "Spel" at the top
                             if (data != null && gameNameColumns.Contains(column))
                             {
-                                if (gameListIndex >= GameList.Count)
-                                {
-                                    GameList.Add(new WeeMasGameEntry()
-                                        {
-                                            WellmanName = data
-                                        });
-                                    gameListIndex++;
-                                }
-                                else
-                                {
-                                    GameList[gameListIndex++].WellmanName = data;
-                                }
+                                WellmanNames.Add(data);
                             }
                         }
                     }
@@ -241,6 +250,82 @@ namespace WeeMasGameFilter
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
+        }
+
+        private void MatchNamesButton_Click(object sender, RoutedEventArgs e)
+        {
+            //Maybe populate XXXNames with the Node objects instead so we don't have to iterate through them twice
+
+            //Step 1: Calculate all possible string matchings (o_O)
+            //Step 2: Remove nodes on one side so that we have equal amount of nodes on each side.
+            //          Should be possible by summing all possible matchings for each node on the dominant side and remove the highest ranking ones
+            //Step 3: Minimum-Cost Perfect Matching problem on the resulting graph
+
+            //Clean strings: Keep only letters and numbers. Remove parentheses if the string between contains ntsc, komplett, kassett, jap, tysk, box, repro
+            //Maybe better idea: Put the parentheses' contents as a separate alternate title and try to match on it.
+
+            List<GameNameNode> weemasNodes = new List<GameNameNode>();
+            List<GameNameNode> wellmanNodes = new List<GameNameNode>();
+            List<GameNameEdge> edges = new List<GameNameEdge>();
+            foreach (var weemasName in WeemasNames)
+            {
+                var weemasNode = new GameNameNode()
+                {
+                    Value = weemasName,
+                    Price = 0
+                };
+                weemasNodes.Add(weemasNode);
+            }
+
+            foreach (var wellmanName in WellmanNames)
+            {
+                var wellmanNode = new GameNameNode()
+                {
+                    Value = wellmanName,
+                    Price = -1 //to be determined later
+                };
+                wellmanNodes.Add(wellmanNode);
+            }
+
+            foreach (var wellmanNode in wellmanNodes)
+            {
+                int minimumScore = int.MaxValue;
+
+                foreach (var weemasNode in weemasNodes)
+                {
+                    int score = CalculateAlignmentScore(weemasNode.Value, wellmanNode.Value);
+                    if (score < minimumScore)
+                        minimumScore = score;
+
+                    edges.Add(new GameNameEdge()
+                    {
+                        Node1 = weemasNode,
+                        Node2 = wellmanNode,
+                        Cost = score
+                    });
+                }
+                wellmanNode.Price = minimumScore;
+            }
+
+            //This is the starting point of the algorithm
+            //While we still have unmatched nodes
+        }
+
+        private int CalculateAlignmentScore(string n1, string n2)
+        {
+            return 0;
+        }
+
+        private void ShowWeemasListButton_Click(object sender, RoutedEventArgs e)
+        {
+            ListWindow window = new ListWindow(m_WeemasNames.ToList());
+            window.ShowDialog();
+        }
+
+        private void ShowWellmanListButton_Click(object sender, RoutedEventArgs e)
+        {
+            ListWindow window = new ListWindow(m_WellmanNames.ToList());
+            window.ShowDialog();
         }
     }
 }
