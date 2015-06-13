@@ -10,67 +10,58 @@ namespace WeeMasGameFilter
 {
     public class WeeMasGameEntry : IEquatable<WeeMasGameEntry>, INotifyPropertyChanged
     {
-        private Color m_TextColor;
-
-        public static Color PERFECT_MATCH = Colors.Black;
-        public static Color UNMATCHED = Colors.Red;
-        public static Color POSSIBLE_MATCH = Colors.Green;
-
-        private string m_WeeMasName;
-        private string m_WellmanName;
-
-        public string WeeMasName
+        private static readonly string stripCharacters = ":-+–.,!'’*/#";
+        private static readonly string[] romanNumerals = new string[]
         {
-            get { return m_WeeMasName; }
-            set
-            {
-                if (m_WeeMasName != value)
-                {
-                    m_WeeMasName = value;
-                    NotifyPropertyChanged("WeeMasName");
-                }
-            }
-        }
+            "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX"
+        };
 
-        public string WellmanName
-        { get { return m_WellmanName; }
-            set
-            {
-                if (m_WellmanName != value)
-                {
-                    m_WellmanName = value;
-                    NotifyPropertyChanged("WellmanName");
-                }
-            }
-        }
-
-        public Color TextColor
+        public WeeMasGameEntry(string data, bool fromWellman)
         {
-            get
+            OriginalName = data;
+
+            data = string.Concat(data.Where(c => !stripCharacters.Contains(c)));
+
+            for (int i = 0; i < romanNumerals.Length; i++)
             {
-                if (m_TextColor == null)
-                {
-                    if (WeeMasName == null || WellmanName == null)
-                        return UNMATCHED;
-                    else if (WeeMasName == WellmanName)
-                        return PERFECT_MATCH;
-                    else
-                        return POSSIBLE_MATCH;
-                }
+                if (data.EndsWith(" " + romanNumerals[i]) || data.EndsWith(" " + romanNumerals[i] + ")"))
+                    data = data.Replace(" " + romanNumerals[i], " " + (i + 1));
                 else
-                {
-                    return m_TextColor;
-                }
+                    data = data.Replace(" " + romanNumerals[i] + " ", " " + (i + 1) + " ");
             }
-            set
+
+            data = data.ToLower();
+            data = System.Text.RegularExpressions.Regex.Replace(data, @"\s+", " ");
+
+            if (fromWellman)
             {
-                m_TextColor = value;
+                int leftParenthesis = data.IndexOf('(');
+                int rightParenthesis = leftParenthesis > 0 ? data.IndexOf(')', leftParenthesis) : -1;
+                if (leftParenthesis > 0 && rightParenthesis > 0)
+                {
+                    AlternateName = data.Substring(leftParenthesis + 1, rightParenthesis - leftParenthesis - 1);
+                    AlternateName = AlternateName.Trim();
+                }
+
+                if (leftParenthesis > 0)
+                    data = data.Substring(0, leftParenthesis);
             }
+            else
+            {
+                data = string.Concat(data.Where(c => c != '(' && c != ')'));
+            }
+
+            data = data.Trim();
+            Name = data;
         }
+
+        public string OriginalName { get; set; }
+        public string Name { get; set; }
+        public string AlternateName { get; set; }
 
         public bool Equals(WeeMasGameEntry other)
         {
-            return WeeMasName == other.WeeMasName && WellmanName == other.WellmanName;
+            return OriginalName == other.OriginalName;
         }
 
         public override bool Equals(Object other)
@@ -85,9 +76,7 @@ namespace WeeMasGameFilter
 
         public override int GetHashCode()
         {
-            int weeMasCode = WeeMasName == null ? 0 : WeeMasName.GetHashCode();
-            int wellmanCode = WellmanName == null ? 0 : WellmanName.GetHashCode();
-            return weeMasCode * 31 + wellmanCode;
+            return OriginalName.GetHashCode();
         }
 
         private void NotifyPropertyChanged(string propertyName = "")

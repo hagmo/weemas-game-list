@@ -6,10 +6,15 @@ Ta bort skiljetecken på båda sidor (utom parenteser i Wellmans lista).
 Lagra parentesinnehåll som en alternativ titel.
 Byt ut alla romerska siffror mot arabiska
 Make lowercase
+Ersätt multipla whitespace med ett enda
 
-Ta ut alla exakta matchningar (prova även med alt. titlar).
+Ta ut alla exakta matchningar (prova även med alt. titlar). Prioritera att de är på samma konsol! Om de inte är på samma konsol, koppla ihop dem om det inte finns någon bättre matchning.
 Strippa småord som "the", "a", "an" och kanske några till.
 Ta ut fler exakta matchningar.
 Slutligen skulle man kunna involvera användaren. Skriv ut återstående omatchade i var sin kolumn. När man klickar på ett spel, sortera på bästa strängmatchning och låt användaren välja ev. matchningar. Det är ett nice första steg, så gör vi.
 
 Som en super-feature of doom skulle man kunna tänka sig att sista steget görs automatiskt i någon mån genom att vi försöker implementera en bipartit matchning. Men den algoritmen kräver två lika långa listor. Vi behöver någon bra metod för att korta ner den längre listan.
+
+Resultatet är ett fönster med alla Wellmans spel i vänsterkolumnen. Matchade namn har en färg och omatchade en annan. Högerkolumnen är samma fast för Weemas. Om man klickar på ett namn så scrollas den andra kolumnen till att visa det matchade namnet överst.
+
+Behöver vi baka in konsolen? Det finns till exempel två Doom i Weemas-listan. Men programmet kan ju omöjligt veta om spelen är olika på olika konsoler, det måste användaren avgöra. Så vi behöver också kunna lista de matchningar som har olika konsol, så att användaren kan sära på dem ifall hen känner till att det inte är samma.

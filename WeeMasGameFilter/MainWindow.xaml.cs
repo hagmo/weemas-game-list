@@ -39,12 +39,11 @@ namespace WeeMasGameFilter
         private OAuth2Parameters parameters;
         private SpreadsheetsService service;
 
-        private ObservableCollection<WeeMasGameEntry> m_GameList;
         private string m_WeeMasURL;
         private string m_GameCollectionFilePath;
 
-        private ObservableCollection<string> m_WeemasNames;
-        private ObservableCollection<string> m_WellmanNames;
+        private ObservableCollection<WeeMasGameEntry> m_WeemasNames;
+        private ObservableCollection<WeeMasGameEntry> m_WellmanNames;
 
         public MainWindow()
         {
@@ -76,9 +75,8 @@ namespace WeeMasGameFilter
             {
                 MessageBox.Show("Authentication failed: " + ex.Message, "Error");
             }
-            m_GameList = new ObservableCollection<WeeMasGameEntry>();
-            m_WeemasNames = new ObservableCollection<string>();
-            m_WellmanNames = new ObservableCollection<string>();
+            m_WeemasNames = new ObservableCollection<WeeMasGameEntry>();
+            m_WellmanNames = new ObservableCollection<WeeMasGameEntry>();
             InitializeComponent();
             WeeMasURL = "https://docs.google.com/spreadsheets/d/1JU7BwpP47sE62wFO79B7ZXhG56h0Mj393eYqRmUZH2s/";
         }
@@ -109,20 +107,7 @@ namespace WeeMasGameFilter
             }
         }
 
-        public ObservableCollection<WeeMasGameEntry> GameList
-        {
-            get { return m_GameList; }
-            set
-            {
-                if (m_GameList != value)
-                {
-                    m_GameList = value;
-                    NotifyPropertyChanged("GameList");
-                }
-            }
-        }
-
-        public ObservableCollection<string> WeemasNames
+        public ObservableCollection<WeeMasGameEntry> WeemasNames
         {
             get { return m_WeemasNames; }
             set
@@ -135,7 +120,7 @@ namespace WeeMasGameFilter
             }
         }
 
-        public ObservableCollection<string> WellmanNames
+        public ObservableCollection<WeeMasGameEntry> WellmanNames
         {
             get { return m_WellmanNames; }
             set
@@ -183,7 +168,7 @@ namespace WeeMasGameFilter
                 for (int i = 0; i < listFeed.Entries.Count; i++)
                 {
                     var row = listFeed.Entries[i];
-                    WeemasNames.Add(row.Title.Text);
+                    WeemasNames.Add(new WeeMasGameEntry(row.Title.Text, false));
                 }
             }
             catch
@@ -210,7 +195,16 @@ namespace WeeMasGameFilter
             {
                 WellmanNames.Clear();
 
-                FileStream stream = File.Open(dialog.FileName, FileMode.Open, FileAccess.Read);
+                FileStream stream = null;
+                try
+                {
+                    stream = File.Open(dialog.FileName, FileMode.Open, FileAccess.Read);
+                }
+                catch (IOException ex)
+                {
+                    MessageBox.Show(ex.Message + "\n\n(Please ensure that the file is not already open in Excel.)");
+                    return;
+                }
                 IExcelDataReader excelReader = ExcelReaderFactory.CreateOpenXmlReader(stream);
 
                 List<int> gameNameColumns = new List<int>();
@@ -232,7 +226,7 @@ namespace WeeMasGameFilter
                             //If we're inside the section with game names, save all fields in the columns that had "Spel" at the top
                             if (data != null && gameNameColumns.Contains(column))
                             {
-                                WellmanNames.Add(data);
+                                WellmanNames.Add(new WeeMasGameEntry(data, true));
                             }
                         }
                     }
@@ -254,7 +248,14 @@ namespace WeeMasGameFilter
 
         private void MatchNamesButton_Click(object sender, RoutedEventArgs e)
         {
-            
+            foreach (var entry in WeemasNames)
+            {
+                Console.WriteLine(string.Format("{0} => {1}", entry.OriginalName, entry.Name));
+            }
+            foreach (var entry in WellmanNames)
+            {
+                Console.WriteLine(string.Format("{0} => {1} [{2}]", entry.OriginalName, entry.Name, entry.AlternateName));
+            }
         }
 
         private int CalculateAlignmentScore(string n1, string n2)
@@ -264,14 +265,14 @@ namespace WeeMasGameFilter
 
         private void ShowWeemasListButton_Click(object sender, RoutedEventArgs e)
         {
-            ListWindow window = new ListWindow(m_WeemasNames.ToList());
-            window.ShowDialog();
+            ListWindow window = new ListWindow(m_WeemasNames);
+            window.Show();
         }
 
         private void ShowWellmanListButton_Click(object sender, RoutedEventArgs e)
         {
-            ListWindow window = new ListWindow(m_WellmanNames.ToList());
-            window.ShowDialog();
+            ListWindow window = new ListWindow(m_WellmanNames);
+            window.Show();
         }
     }
 }
