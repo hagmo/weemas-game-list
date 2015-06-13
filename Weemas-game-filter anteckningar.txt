@@ -1,0 +1,15 @@
+Weemas-game-filter anteckningar
+===============================
+
+Strippa textsträngar:
+Ta bort skiljetecken på båda sidor (utom parenteser i Wellmans lista).
+Lagra parentesinnehåll som en alternativ titel.
+Byt ut alla romerska siffror mot arabiska
+Make lowercase
+
+Ta ut alla exakta matchningar (prova även med alt. titlar).
+Strippa småord som "the", "a", "an" och kanske några till.
+Ta ut fler exakta matchningar.
+Slutligen skulle man kunna involvera användaren. Skriv ut återstående omatchade i var sin kolumn. När man klickar på ett spel, sortera på bästa strängmatchning och låt användaren välja ev. matchningar. Det är ett nice första steg, så gör vi.
+
+Som en super-feature of doom skulle man kunna tänka sig att sista steget görs automatiskt i någon mån genom att vi försöker implementera en bipartit matchning. Men den algoritmen kräver två lika långa listor. Vi behöver någon bra metod för att korta ner den längre listan.

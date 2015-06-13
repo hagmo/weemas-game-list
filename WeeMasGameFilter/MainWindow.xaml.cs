@@ -254,61 +254,7 @@ namespace WeeMasGameFilter
 
         private void MatchNamesButton_Click(object sender, RoutedEventArgs e)
         {
-            //Maybe populate XXXNames with the Node objects instead so we don't have to iterate through them twice
-
-            //Step 1: Calculate all possible string matchings (o_O)
-            //Step 2: Remove nodes on one side so that we have equal amount of nodes on each side.
-            //          Should be possible by summing all possible matchings for each node on the dominant side and remove the highest ranking ones
-            //Step 3: Minimum-Cost Perfect Matching problem on the resulting graph
-
-            //Clean strings: Keep only letters and numbers. Remove parentheses if the string between contains ntsc, komplett, kassett, jap, tysk, box, repro
-            //Maybe better idea: Put the parentheses' contents as a separate alternate title and try to match on it.
-
-            List<GameNameNode> weemasNodes = new List<GameNameNode>();
-            List<GameNameNode> wellmanNodes = new List<GameNameNode>();
-            List<GameNameEdge> edges = new List<GameNameEdge>();
-            foreach (var weemasName in WeemasNames)
-            {
-                var weemasNode = new GameNameNode()
-                {
-                    Value = weemasName,
-                    Price = 0
-                };
-                weemasNodes.Add(weemasNode);
-            }
-
-            foreach (var wellmanName in WellmanNames)
-            {
-                var wellmanNode = new GameNameNode()
-                {
-                    Value = wellmanName,
-                    Price = -1 //to be determined later
-                };
-                wellmanNodes.Add(wellmanNode);
-            }
-
-            foreach (var wellmanNode in wellmanNodes)
-            {
-                int minimumScore = int.MaxValue;
-
-                foreach (var weemasNode in weemasNodes)
-                {
-                    int score = CalculateAlignmentScore(weemasNode.Value, wellmanNode.Value);
-                    if (score < minimumScore)
-                        minimumScore = score;
-
-                    edges.Add(new GameNameEdge()
-                    {
-                        Node1 = weemasNode,
-                        Node2 = wellmanNode,
-                        Cost = score
-                    });
-                }
-                wellmanNode.Price = minimumScore;
-            }
-
-            //This is the starting point of the algorithm
-            //While we still have unmatched nodes
+            
         }
 
         private int CalculateAlignmentScore(string n1, string n2)
