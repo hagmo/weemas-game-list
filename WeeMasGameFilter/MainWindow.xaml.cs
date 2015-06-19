@@ -156,19 +156,21 @@ namespace WeeMasGameFilter
                     key = queryString["key"];
                 }
 
-                WorksheetQuery query = new WorksheetQuery(key, "private", "basic");
+                WorksheetQuery query = new WorksheetQuery(key, "private", "full");
                 WorksheetFeed feed = service.Query(query);
 
                 WeemasNames.Clear();
 
                 WorksheetEntry worksheet = (WorksheetEntry)feed.Entries[0];
+
                 AtomLink listFeedLink = worksheet.Links.FindService(GDataSpreadsheetsNameTable.ListRel, null);
                 ListQuery listQuery = new ListQuery(listFeedLink.HRef.ToString());
                 ListFeed listFeed = service.Query(listQuery);
-                for (int i = 0; i < listFeed.Entries.Count; i++)
+                foreach (ListEntry row in listFeed.Entries)
                 {
-                    var row = listFeed.Entries[i];
-                    WeemasNames.Add(new WeeMasGameEntry(row.Title.Text, false));
+                    var gameEntry = new WeeMasGameEntry(row.Title.Text, false);
+                    gameEntry.Console = row.Elements[1].Value;
+                    WeemasNames.Add(gameEntry);
                 }
             }
             catch
@@ -248,13 +250,17 @@ namespace WeeMasGameFilter
 
         private void MatchNamesButton_Click(object sender, RoutedEventArgs e)
         {
-            foreach (var entry in WeemasNames)
+            foreach (var entry in m_WeemasNames)
             {
-                Console.WriteLine(string.Format("{0} => {1}", entry.OriginalName, entry.Name));
-            }
-            foreach (var entry in WellmanNames)
-            {
-                Console.WriteLine(string.Format("{0} => {1} [{2}]", entry.OriginalName, entry.Name, entry.AlternateName));
+                var match = m_WellmanNames.SingleOrDefault(ent => ent.Name == entry.Name && ent.Match == null);
+                if (match == null)
+                    match = m_WellmanNames.SingleOrDefault(ent => ent.AlternateName == entry.Name && ent.Match == null);
+
+                if (match != null)
+                {
+                    entry.Match = match;
+                    match.Match = entry;
+                }
             }
         }
 

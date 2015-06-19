@@ -54,14 +54,15 @@
         </Grid>
         <DockPanel Grid.Row="2">
             <Button DockPanel.Dock="Bottom" Height="50" Click="MatchNamesButton_Click">Match names</Button>
-            <ListView DockPanel.Dock="Top" ItemsSource="{Binding GameList}">
-                <ListView.View>
-                    <GridView AllowsColumnReorder="True">
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=WeeMasName}" Header="Wee-mas name"/>
-                        <GridViewColumn DisplayMemberBinding="{Binding Path=WellmanName}" Header="Wellman's name"/>
-                    </GridView>
-                </ListView.View>
-            </ListView>
+            <Grid DockPanel.Dock="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                
+                <ListView Grid.Column="0" ItemsSource="{Binding WeemasList}"/>
+                <ListView Grid.Column="1" ItemsSource="{Binding WellmanList}"/>
+            </Grid>
         </DockPanel>
     </Grid>
 </Window>

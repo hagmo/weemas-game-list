@@ -10,7 +10,13 @@
         </Grid.RowDefinitions>
         
         <ScrollViewer Grid.Row="0">
-            <ListView ItemsSource="{Binding GameList}" />
+            <ListView ItemsSource="{Binding GameList}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding DisplayString}"/>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
         </ScrollViewer>
         <Button Grid.Row="1" Click="Button_Click">Close</Button>
     </Grid>

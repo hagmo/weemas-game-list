@@ -58,6 +58,8 @@ namespace WeeMasGameFilter
         public string OriginalName { get; set; }
         public string Name { get; set; }
         public string AlternateName { get; set; }
+        public string Console { get; set; }
+        public WeeMasGameEntry Match { get; set; }
 
         public bool Equals(WeeMasGameEntry other)
         {
@@ -77,6 +79,11 @@ namespace WeeMasGameFilter
         public override int GetHashCode()
         {
             return OriginalName.GetHashCode();
+        }
+
+        public string DisplayString
+        {
+            get { return string.Format("{0} ({1})", Name, Console); }
         }
 
         private void NotifyPropertyChanged(string propertyName = "")
