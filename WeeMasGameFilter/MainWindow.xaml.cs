@@ -44,6 +44,11 @@ namespace WeeMasGameFilter
 
         private ObservableCollection<WeeMasGameEntry> m_WeemasNames;
         private ObservableCollection<WeeMasGameEntry> m_WellmanNames;
+        private string m_WeemasSearchString;
+        private string m_WellmanSearchString;
+
+        private WeeMasGameEntry m_SelectedWeemasItem;
+        private WeeMasGameEntry m_SelectedWellmanItem;
 
         public MainWindow()
         {
@@ -133,6 +138,100 @@ namespace WeeMasGameFilter
             }
         }
 
+        public string WeemasSearchString
+        {
+            get { return m_WeemasSearchString; }
+            set
+            {
+                if (m_WeemasSearchString != value)
+                {
+                    m_WeemasSearchString = value;
+                    NotifyPropertyChanged("FilteredWeemasNames");
+                }
+            }
+        }
+
+        public IEnumerable<WeeMasGameEntry> FilteredWeemasNames
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(m_WeemasSearchString))
+                {
+                    var filteredEntries = m_WeemasNames.Where(e => e.OriginalName.ToLower().Contains(m_WeemasSearchString.ToLower()));
+                    filteredEntries = filteredEntries.Union(m_WeemasNames.Where(e => e.Console.ToLower().Contains(m_WeemasSearchString.ToLower())));
+                    return filteredEntries;
+                }
+                else
+                {
+                    return m_WeemasNames;
+                }
+            }
+        }
+
+        public string WellmanSearchString
+        {
+            get { return m_WellmanSearchString; }
+            set
+            {
+                if (m_WellmanSearchString != value)
+                {
+                    m_WellmanSearchString = value;
+                    NotifyPropertyChanged("FilteredWellmanNames");
+                }
+            }
+        }
+
+        public IEnumerable<WeeMasGameEntry> FilteredWellmanNames
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(m_WellmanSearchString))
+                {
+                    var filteredEntries = m_WellmanNames.Where(e => e.OriginalName.ToLower().Contains(m_WellmanSearchString.ToLower()));
+                    filteredEntries = filteredEntries.Union(m_WellmanNames.Where(e => e.Console.ToLower().Contains(m_WellmanSearchString.ToLower())));
+                    return filteredEntries;
+                }
+                else
+                {
+                    return m_WellmanNames;
+                }
+            }
+        }
+
+        public int NbrOfMatches
+        {
+            get
+            {
+                return m_WeemasNames.Where(e => e.Match != null).Count();
+            }
+        }
+
+        public WeeMasGameEntry SelectedWeemasItem
+        {
+            get { return m_SelectedWeemasItem; }
+            set
+            {
+                if (m_SelectedWeemasItem != value)
+                {
+                    m_SelectedWeemasItem = value;
+                    NotifyPropertyChanged("SelectedWeemasItem");
+                }
+            }
+        }
+
+        public WeeMasGameEntry SelectedWellmanItem
+        {
+            get { return m_SelectedWellmanItem; }
+            set
+            {
+                if (m_SelectedWellmanItem != value)
+                {
+                    m_SelectedWellmanItem = value;
+                    NotifyPropertyChanged("SelectedWellmanItem");
+                }
+            }
+        }
+
         private void DownloadButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -169,7 +268,7 @@ namespace WeeMasGameFilter
                 foreach (ListEntry row in listFeed.Entries)
                 {
                     var gameEntry = new WeeMasGameEntry(row.Title.Text, false);
-                    gameEntry.Console = row.Elements[1].Value;
+                    gameEntry.Console = ParseConsoleName(row.Elements[1].Value);
                     WeemasNames.Add(gameEntry);
                 }
             }
@@ -210,14 +309,25 @@ namespace WeeMasGameFilter
                 IExcelDataReader excelReader = ExcelReaderFactory.CreateOpenXmlReader(stream);
 
                 List<int> gameNameColumns = new List<int>();
+                List<string> consoleNames = new List<string>();
                 int row = 0;
                 int firstGameNameRow = int.MaxValue;
                 while (excelReader.Read())
                 {
+                    bool consoleRow = false;
                     for (int column = 0; column < excelReader.FieldCount; column++)
                     {
-                        //Remember all columns that have "Spel", since those contain the game names.
                         string data = excelReader.GetString(column);
+                        if (data == "NES")
+                        {
+                            consoleRow = true;
+                        }
+
+                        if (consoleRow == true && column % 2 != 0)
+                        {
+                            consoleNames.Add(ParseConsoleName(data));
+                        }
+                        //Remember all columns that have "Spel", since those contain the game names.
                         if (row < firstGameNameRow && data == "Spel")
                         {
                             gameNameColumns.Add(column);
@@ -228,7 +338,10 @@ namespace WeeMasGameFilter
                             //If we're inside the section with game names, save all fields in the columns that had "Spel" at the top
                             if (data != null && gameNameColumns.Contains(column))
                             {
-                                WellmanNames.Add(new WeeMasGameEntry(data, true));
+                                var entry = new WeeMasGameEntry(data, true);
+                                entry.Console = consoleNames[gameNameColumns.IndexOf(column)];
+                                if (!WellmanNames.Contains(entry))
+                                    WellmanNames.Add(entry);
                             }
                         }
                     }
@@ -252,16 +365,35 @@ namespace WeeMasGameFilter
         {
             foreach (var entry in m_WeemasNames)
             {
-                var match = m_WellmanNames.SingleOrDefault(ent => ent.Name == entry.Name && ent.Match == null);
-                if (match == null)
-                    match = m_WellmanNames.SingleOrDefault(ent => ent.AlternateName == entry.Name && ent.Match == null);
-
-                if (match != null)
+                try
                 {
-                    entry.Match = match;
-                    match.Match = entry;
+                    //prioritize console matches
+                    var match = m_WellmanNames.SingleOrDefault(ent => ent.Name == entry.Name && ent.Console == entry.Console && ent.Match == null);
+
+                    if (match == null)
+                        match = m_WellmanNames.SingleOrDefault(ent => ent.AlternateName == entry.Name && ent.Console == entry.Console && ent.Match == null);
+
+                    //exact name matches
+                    if (match == null)
+                        match = m_WellmanNames.SingleOrDefault(ent => ent.Name == entry.Name && ent.Match == null);
+                    
+                    if (match == null)
+                        match = m_WellmanNames.SingleOrDefault(ent => ent.AlternateName == entry.Name && ent.Match == null);
+
+                    if (match != null)
+                    {
+                        entry.Match = match;
+                        match.Match = entry;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    var result = MessageBox.Show(string.Format("{0} on {1}: {2}. Show stacktrace?", ex, entry.OriginalName, ex.Message), "Error", MessageBoxButton.YesNo);
+                    if (result == MessageBoxResult.Yes)
+                        MessageBox.Show(ex.StackTrace);
                 }
             }
+            NotifyPropertyChanged("NbrOfMatches");
         }
 
         private int CalculateAlignmentScore(string n1, string n2)
@@ -279,6 +411,92 @@ namespace WeeMasGameFilter
         {
             ListWindow window = new ListWindow(m_WellmanNames);
             window.Show();
+        }
+
+        private string ParseConsoleName(string s)
+        {
+            string sl = s.ToLower();
+            if (sl == "xbox360")
+                return "X360";
+            else if (sl == "nintendo 64")
+                return "N64";
+            else if (sl == "gamecube")
+                return "GCN";
+            else if (sl == "game boy")
+                return "GB";
+            else if (sl == "virtual boy")
+                return "VB";
+            else if (sl == "game boy color")
+                return "GBC";
+            else if (sl == "game boy advance micro")
+                return "GBA";
+            else if (sl == "nintendo ds lite")
+                return "NDS";
+            else if (sl == "nintendo 3ds + xl*")
+                return "3DS";
+            else if (sl == "sega master system")
+                return "SMS";
+            else if (sl == "sega genesis")
+                return "SMD";
+            else if (sl == "md")
+                return "SMD";
+            else if (sl == "sega cd")
+                return "SCD";
+            else if (sl == "sega saturn")
+                return "SAT";
+            else if (sl == "dreamcast")
+                return "DC";
+            else if (sl == "game gear")
+                return "GG";
+            else if (sl == "playstation")
+                return "PSX";
+            else if (sl == "playstation 2")
+                return "PS2";
+            else if (sl == "playstation 3")
+                return "PS3";
+            else if (sl == "playstation 4")
+                return "PS4";
+            else if (sl == "playstation portable")
+                return "PSP";
+            else if (sl == "playstation vita")
+                return "PSV";
+            else if (sl == "playstation")
+                return "PSX";
+            else return s;
+        }
+
+        private void ResetMatchesButton_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var entry in WellmanNames)
+                entry.Match = null;
+            foreach (var entry in WeemasNames)
+                entry.Match = null;
+        }
+
+        private void WeemasList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count == 0)
+                return;
+
+            var entry = e.AddedItems[0] as WeeMasGameEntry;
+            if (entry.Match != null)
+            {
+                SelectedWellmanItem = entry.Match;
+                ((ListView)sender).ScrollIntoView(entry);
+            }
+        }
+
+        private void WellmanList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count == 0)
+                return;
+
+            var entry = e.AddedItems[0] as WeeMasGameEntry;
+            if (entry.Match != null)
+            {
+                SelectedWeemasItem = entry.Match;
+                ((ListView)sender).ScrollIntoView(entry);
+            }
         }
     }
 }

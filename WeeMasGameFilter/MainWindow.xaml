@@ -38,21 +38,12 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Grid.Resources>
-                <system:String x:Key="WellmanFormat">View Wellman's list ({0} entries)</system:String>
-            </Grid.Resources>
-            <Button Grid.Column="0" Margin="2" Click="ShowWeemasListButton_Click">
-                <Button.Content>
-                    <TextBlock Text="{Binding WeemasNames.Count, StringFormat=View Wee-mas list ({0} entries), FallbackValue='View Wee-mas list (0 entries)'}"/>
-                </Button.Content>
-            </Button>
-            <Button Grid.Column="1" Margin="2" Click="ShowWellmanListButton_Click">
-                <Button.Content>
-                    <TextBlock Text="{Binding WellmanNames.Count, StringFormat={StaticResource WellmanFormat}, FallbackValue='View Wellmans list (0 entries)'}"/>
-                </Button.Content>
-            </Button>
         </Grid>
         <DockPanel Grid.Row="2">
+            <Label DockPanel.Dock="Top">
+                <TextBlock Text="{Binding NbrOfMatches, StringFormat={}{0} matched games}"/>
+            </Label>
+            <Button DockPanel.Dock="Bottom" Height="20" Click="ResetMatchesButton_Click">Reset matches</Button>
             <Button DockPanel.Dock="Bottom" Height="50" Click="MatchNamesButton_Click">Match names</Button>
             <Grid DockPanel.Dock="Top">
                 <Grid.ColumnDefinitions>
@@ -60,8 +51,49 @@
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
                 
-                <ListView Grid.Column="0" ItemsSource="{Binding WeemasList}"/>
-                <ListView Grid.Column="1" ItemsSource="{Binding WellmanList}"/>
+                <DockPanel Grid.Column="0">
+                    <DockPanel DockPanel.Dock="Bottom">
+                        <TextBlock DockPanel.Dock="Left" Margin="2">Search:</TextBlock>
+                        <TextBox DockPanel.Dock="Left" Text="{Binding WeemasSearchString, UpdateSourceTrigger=PropertyChanged}"/>
+                    </DockPanel>
+                    
+                    <ListView DockPanel.Dock="Top" ItemsSource="{Binding FilteredWeemasNames}" SelectionMode="Single" SelectionChanged="WeemasList_SelectionChanged" SelectedItem="{Binding SelectedWeemasItem}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Background="{Binding BackgroundColor}">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}{0} [{1}]">
+                                            <Binding Path="OriginalName"/>
+                                            <Binding Path="Console"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </DockPanel>
+                
+                <DockPanel Grid.Column="1">
+                    <DockPanel DockPanel.Dock="Bottom">
+                        <TextBlock DockPanel.Dock="Left" Margin="2">Search:</TextBlock>
+                        <TextBox DockPanel.Dock="Left" Text="{Binding WellmanSearchString, UpdateSourceTrigger=PropertyChanged}"/>
+                    </DockPanel>
+                    <ListView DockPanel.Dock="Top" ItemsSource="{Binding FilteredWellmanNames}" SelectionMode="Single" SelectionChanged="WellmanList_SelectionChanged" SelectedItem="{Binding SelectedWellmanItem}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Background="{Binding BackgroundColor}">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}{0} [{1}]">
+                                            <Binding Path="OriginalName"/>
+                                            <Binding Path="Console"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </DockPanel>
+                
             </Grid>
         </DockPanel>
     </Grid>

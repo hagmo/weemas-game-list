@@ -16,6 +16,8 @@ namespace WeeMasGameFilter
             "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX"
         };
 
+        private WeeMasGameEntry m_Match;
+
         public WeeMasGameEntry(string data, bool fromWellman)
         {
             OriginalName = data;
@@ -59,11 +61,32 @@ namespace WeeMasGameFilter
         public string Name { get; set; }
         public string AlternateName { get; set; }
         public string Console { get; set; }
-        public WeeMasGameEntry Match { get; set; }
+        public WeeMasGameEntry Match
+        {
+            get { return m_Match; }
+            set
+            {
+                if (m_Match != value)
+                {
+                    m_Match = value;
+                    NotifyPropertyChanged("BackgroundColor");
+                }
+            }
+        }
+        public Brush BackgroundColor
+        {
+            get
+            {
+                if (Match == null)
+                    return Brushes.Transparent;
+                else
+                    return Brushes.LightGreen;
+            }
+        }
 
         public bool Equals(WeeMasGameEntry other)
         {
-            return OriginalName == other.OriginalName;
+            return Name == other.Name;
         }
 
         public override bool Equals(Object other)
@@ -78,12 +101,7 @@ namespace WeeMasGameFilter
 
         public override int GetHashCode()
         {
-            return OriginalName.GetHashCode();
-        }
-
-        public string DisplayString
-        {
-            get { return string.Format("{0} ({1})", Name, Console); }
+            return Name.GetHashCode();
         }
 
         private void NotifyPropertyChanged(string propertyName = "")
