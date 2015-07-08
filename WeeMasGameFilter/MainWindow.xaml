@@ -45,6 +45,16 @@
             </Label>
             <Button DockPanel.Dock="Bottom" Height="20" Click="ResetMatchesButton_Click">Reset matches</Button>
             <Button DockPanel.Dock="Bottom" Height="50" Click="MatchNamesButton_Click">Match names</Button>
+            <Grid DockPanel.Dock="Bottom">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Click="NameSortButton_Click">Sort by name</Button>
+                <Button Grid.Column="1" Click="ConsoleSortButton_Click">Sort by console</Button>
+                <Button Grid.Column="2" Click="MatchSortButton_Click">Sort by matched</Button>
+            </Grid>
             <Grid DockPanel.Dock="Top">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>

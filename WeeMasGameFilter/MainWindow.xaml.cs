@@ -267,7 +267,7 @@ namespace WeeMasGameFilter
                 ListFeed listFeed = service.Query(listQuery);
                 foreach (ListEntry row in listFeed.Entries)
                 {
-                    var gameEntry = new WeeMasGameEntry(row.Title.Text, false);
+                    var gameEntry = new WeeMasGameEntry(row.Title.Text.Trim(), false);
                     gameEntry.Console = ParseConsoleName(row.Elements[1].Value);
                     WeemasNames.Add(gameEntry);
                 }
@@ -497,6 +497,49 @@ namespace WeeMasGameFilter
                 SelectedWeemasItem = entry.Match;
                 ((ListView)sender).ScrollIntoView(entry);
             }
+        }
+
+        private void NameSortButton_Click(object sender, RoutedEventArgs e)
+        {
+            SortLists(delegate(WeeMasGameEntry x, WeeMasGameEntry y)
+            {
+                return x.Name.CompareTo(y.Name);
+            });
+        }
+
+        private void ConsoleSortButton_Click(object sender, RoutedEventArgs e)
+        {
+            SortLists(delegate(WeeMasGameEntry x, WeeMasGameEntry y)
+            {
+                return x.Console.CompareTo(y.Console);
+            });
+        }
+
+        private void MatchSortButton_Click(object sender, RoutedEventArgs e)
+        {
+            SortLists(delegate(WeeMasGameEntry x, WeeMasGameEntry y)
+            {
+                if (x.Match != null && y.Match == null)
+                    return -1;
+                if (x.Match == null && y.Match != null)
+                    return 1;
+                return 0;
+            });
+        }
+
+        private void SortLists(Comparison<WeeMasGameEntry> comparison)
+        {
+            var sorted = WeemasNames.ToList();
+            sorted.Sort(comparison);
+            WeemasNames.Clear();
+            foreach (var entry in sorted)
+                WeemasNames.Add(entry);
+
+            sorted = WellmanNames.ToList();
+            sorted.Sort(comparison);
+            WellmanNames.Clear();
+            foreach (var entry in sorted)
+                WellmanNames.Add(entry);
         }
     }
 }
