@@ -79,8 +79,10 @@ namespace WeeMasGameFilter
             {
                 if (Match == null)
                     return Brushes.Transparent;
-                else
+                else if (Match.Console.ToLower() == Console.ToLower())
                     return Brushes.LightGreen;
+                else
+                    return Brushes.LimeGreen;
             }
         }
 

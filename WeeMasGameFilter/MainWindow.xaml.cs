@@ -361,7 +361,7 @@ namespace WeeMasGameFilter
             }
         }
 
-        private void MatchNamesButton_Click(object sender, RoutedEventArgs e)
+        private void AutoMatchButton_Click(object sender, RoutedEventArgs e)
         {
             foreach (var entry in m_WeemasNames)
             {
@@ -444,6 +444,8 @@ namespace WeeMasGameFilter
                 return "SCD";
             else if (sl == "sega saturn")
                 return "SAT";
+            else if (sl == "saturn")
+                return "SAT";
             else if (sl == "dreamcast")
                 return "DC";
             else if (sl == "game gear")
@@ -465,7 +467,7 @@ namespace WeeMasGameFilter
             else return s;
         }
 
-        private void ResetMatchesButton_Click(object sender, RoutedEventArgs e)
+        private void UnmatchAllButton_Click(object sender, RoutedEventArgs e)
         {
             foreach (var entry in WellmanNames)
                 entry.Match = null;
@@ -496,6 +498,13 @@ namespace WeeMasGameFilter
             {
                 SelectedWeemasItem = entry.Match;
                 ((ListView)sender).ScrollIntoView(entry);
+            }
+            else
+            {
+                foreach (var weemasItem in WeemasNames)
+                {
+
+                }
             }
         }
 
@@ -540,6 +549,24 @@ namespace WeeMasGameFilter
             WellmanNames.Clear();
             foreach (var entry in sorted)
                 WellmanNames.Add(entry);
+        }
+
+        private void UnmatchSelectedButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (SelectedWeemasItem != null && SelectedWellmanItem != null)
+            {
+                SelectedWeemasItem.Match = null;
+                SelectedWellmanItem.Match = null;
+            }
+        }
+
+        private void MatchSelectedButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (SelectedWeemasItem != null && SelectedWellmanItem != null)
+            {
+                SelectedWeemasItem.Match = SelectedWellmanItem;
+                SelectedWellmanItem.Match = SelectedWeemasItem;
+            }
         }
     }
 }
