@@ -79,15 +79,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ListWindow.xaml.cs">
-      <DependentUpon>ListWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="WeeMasGameEntry.cs" />
     <Page Include="GoogleAuthWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="ListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

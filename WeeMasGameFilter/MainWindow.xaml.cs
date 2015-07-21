@@ -396,23 +396,6 @@ namespace WeeMasGameFilter
             NotifyPropertyChanged("NbrOfMatches");
         }
 
-        private int CalculateAlignmentScore(string n1, string n2)
-        {
-            return 0;
-        }
-
-        private void ShowWeemasListButton_Click(object sender, RoutedEventArgs e)
-        {
-            ListWindow window = new ListWindow(m_WeemasNames);
-            window.Show();
-        }
-
-        private void ShowWellmanListButton_Click(object sender, RoutedEventArgs e)
-        {
-            ListWindow window = new ListWindow(m_WellmanNames);
-            window.Show();
-        }
-
         private string ParseConsoleName(string s)
         {
             string sl = s.ToLower();
@@ -473,58 +456,6 @@ namespace WeeMasGameFilter
                 entry.Match = null;
             foreach (var entry in WeemasNames)
                 entry.Match = null;
-        }
-
-        private void WeemasList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (e.AddedItems.Count == 0)
-                return;
-
-            var entry = e.AddedItems[0] as WeeMasGameEntry;
-            if (entry.Match != null)
-            {
-                SelectedWellmanItem = entry.Match;
-                ((ListView)sender).ScrollIntoView(entry);
-            }
-            else
-            {
-                foreach (var wellmanItem in WellmanNames)
-                {
-                    wellmanItem.StringAligment = StringAlignment(wellmanItem.Name, entry.Name);
-                }
-                SortWellmanList(delegate(WeeMasGameEntry x, WeeMasGameEntry y)
-                {
-                    return x.StringAligment - y.StringAligment;
-                });
-                if (WellmanNames.Count > 0)
-                    WellmanListView.ScrollIntoView(WellmanNames[0]);
-            }
-        }
-
-        private void WellmanList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (e.AddedItems.Count == 0)
-                return;
-
-            var entry = e.AddedItems[0] as WeeMasGameEntry;
-            if (entry.Match != null)
-            {
-                SelectedWeemasItem = entry.Match;
-                ((ListView)sender).ScrollIntoView(entry);
-            }
-            else
-            {
-                foreach (var weemasItem in WeemasNames)
-                {
-                    weemasItem.StringAligment = StringAlignment(weemasItem.Name, entry.Name);
-                }
-                SortWeemasList(delegate(WeeMasGameEntry x, WeeMasGameEntry y)
-                {
-                    return x.StringAligment - y.StringAligment;
-                });
-                if (WeemasNames.Count > 0)
-                    WeemasListView.ScrollIntoView(WeemasNames[0]);
-            }
         }
 
         private void NameSortButton_Click(object sender, RoutedEventArgs e)

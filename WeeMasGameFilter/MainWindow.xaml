@@ -40,9 +40,17 @@
             </Grid.ColumnDefinitions>
         </Grid>
         <DockPanel Grid.Row="2">
-            <Label DockPanel.Dock="Top">
-                <TextBlock Text="{Binding NbrOfMatches, StringFormat={}{0} matched games}"/>
-            </Label>
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
+                <Label>
+                    <TextBlock Text="{Binding NbrOfMatches, StringFormat={}{0} matched games, FallbackValue=0 matched games}"/>
+                </Label>
+                <Label>
+                    <TextBlock Text="{Binding WellmanNames.Count, StringFormat={}{0} Wellman games, FallbackValue=0 Wellman games}"/>
+                </Label>
+                <Label>
+                    <TextBlock Text="{Binding WeemasNames.Count, StringFormat={}{0} Weemas games, FallbackValue=0 Weemas games}"/>
+                </Label>
+            </StackPanel>
             <Button DockPanel.Dock="Bottom" Height="20" Click="UnmatchSelectedButton_Click">Unmatch selected</Button>
             <Button DockPanel.Dock="Bottom" Height="20" Click="UnmatchAllButton_Click">Unmatch all</Button>
             <Button DockPanel.Dock="Bottom" Height="20" Click="MatchSelectedButton_Click">Match selected</Button>
