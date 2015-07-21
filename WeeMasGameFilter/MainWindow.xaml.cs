@@ -486,6 +486,23 @@ namespace WeeMasGameFilter
                 SelectedWellmanItem = entry.Match;
                 ((ListView)sender).ScrollIntoView(entry);
             }
+            else
+            {
+                foreach (var wellmanItem in WellmanNames)
+                {
+                    wellmanItem.StringAligment = StringAlignment(wellmanItem.Name, entry.Name);
+                }
+                var sorted = WellmanNames.ToList();
+                sorted.Sort(delegate(WeeMasGameEntry x, WeeMasGameEntry y)
+                {
+                    return x.StringAligment - y.StringAligment;
+                });
+                WellmanNames.Clear();
+                foreach (var sortedEntry in sorted)
+                    WellmanNames.Add(sortedEntry);
+                if (WellmanNames.Count > 0)
+                    WellmanListView.ScrollIntoView(WellmanNames[0]);
+            }
         }
 
         private void WellmanList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -503,8 +520,18 @@ namespace WeeMasGameFilter
             {
                 foreach (var weemasItem in WeemasNames)
                 {
-
+                    weemasItem.StringAligment = StringAlignment(weemasItem.Name, entry.Name);
                 }
+                var sorted = WeemasNames.ToList();
+                sorted.Sort(delegate(WeeMasGameEntry x, WeeMasGameEntry y)
+                {
+                    return x.StringAligment - y.StringAligment;
+                });
+                WeemasNames.Clear();
+                foreach (var sortedEntry in sorted)
+                    WeemasNames.Add(sortedEntry);
+                if (WeemasNames.Count > 0)
+                    WeemasListView.ScrollIntoView(WeemasNames[0]);
             }
         }
 
@@ -567,6 +594,46 @@ namespace WeeMasGameFilter
                 SelectedWeemasItem.Match = SelectedWellmanItem;
                 SelectedWellmanItem.Match = SelectedWeemasItem;
             }
+        }
+
+        private int StringAlignment(string s1, string s2)
+        {
+            int[,] alignments = new int[s1.Length + 1, s2.Length + 1];
+
+            for (int j = 0; j <= s2.Length; j++)
+            {
+                alignments[0, j] = j;
+            }
+
+            for (int i = 1; i <= s1.Length; i++)
+            {
+                alignments[i, 0] = i;
+                for (int j = 1; j <= s2.Length; j++)
+                {
+                    alignments[i, j] = -1;
+                }
+            }
+
+            return StringAlignment(alignments, s1, s2);
+        }
+
+        private int StringAlignment(int[,] alignments, string s1, string s2)
+        {
+            if (alignments[s1.Length, s2.Length] != -1)
+                return alignments[s1.Length, s2.Length];
+
+            for (int i = 1; i <= s1.Length; i++)
+            {
+                for (int j = 1; j <= s2.Length; j++)
+                {
+                    int penalty = s1[i - 1] == s2[j - 1] ? 0 : 1;
+                    int v1 = penalty + StringAlignment(alignments, s1.Substring(0, i - 1), s2.Substring(0, j - 1));
+                    int v2 = 1 + StringAlignment(alignments, s1.Substring(0, i - 1), s2.Substring(0, j));
+                    int v3 = 1 + StringAlignment(alignments, s1.Substring(0, i), s2.Substring(0, j - 1));
+                    alignments[i, j] = Math.Min(v1, Math.Min(v2, v3));
+                }
+            }
+            return alignments[s1.Length, s2.Length];
         }
     }
 }

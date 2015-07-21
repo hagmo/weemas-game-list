@@ -8,13 +8,4 @@ Byt ut alla romerska siffror mot arabiska
 Make lowercase
 Ersätt multipla whitespace med ett enda
 
-Ta ut alla exakta matchningar (prova även med alt. titlar). Prioritera att de är på samma konsol!
-Strippa småord som "the", "a", "an" och kanske några till.
-Ta ut fler exakta matchningar.
-Slutligen skulle man kunna involvera användaren. Skriv ut återstående omatchade i var sin kolumn. När man klickar på ett spel, sortera på bästa strängmatchning och låt användaren välja ev. matchningar. Det är ett nice första steg, så gör vi.
-
-Som en super-feature of doom skulle man kunna tänka sig att sista steget görs automatiskt i någon mån genom att vi försöker implementera en bipartit matchning. Men den algoritmen kräver två lika långa listor. Vi behöver någon bra metod för att korta ner den längre listan.
-
-Om man klickar på ett omatchat namn så sorteras högerkolumnen på bästa strängmatchning för det valda namnet, och så finns det möjlighet att koppla. Bör väl också finnas en möjlighet att koppla loss, ifall programmet har matchat fel (t.ex. spel med samma namn men som är olika på olika konsoler).
-
 Matcha även alt. titlar tillsammans med namnet. Ibland är de snarare undertitel än alternativ.

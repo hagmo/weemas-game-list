@@ -85,6 +85,7 @@ namespace WeeMasGameFilter
                     return Brushes.LimeGreen;
             }
         }
+        public int StringAligment { get; set; }
 
         public bool Equals(WeeMasGameEntry other)
         {
