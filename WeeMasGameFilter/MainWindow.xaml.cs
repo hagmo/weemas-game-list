@@ -577,7 +577,8 @@ namespace WeeMasGameFilter
 
             if (SelectedWeemasItem.Match != null)
             {
-                WellmanListView.ScrollIntoView(SelectedWeemasItem.Match);
+                SelectedWellmanItem = SelectedWeemasItem.Match;
+                WellmanListView.ScrollIntoView(SelectedWellmanItem);
             }
             else
             {
