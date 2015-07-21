@@ -69,7 +69,7 @@
                         <TextBox DockPanel.Dock="Left" Text="{Binding WeemasSearchString, UpdateSourceTrigger=PropertyChanged}"/>
                     </DockPanel>
                     
-                    <ListView DockPanel.Dock="Top" x:Name="WeemasListView" ItemsSource="{Binding FilteredWeemasNames}" SelectionMode="Single" SelectionChanged="WeemasList_SelectionChanged" SelectedItem="{Binding SelectedWeemasItem}">
+                    <ListView DockPanel.Dock="Top" x:Name="WeemasListView" ItemsSource="{Binding FilteredWeemasNames}" SelectionMode="Single" MouseDoubleClick="WeemasListView_MouseDoubleClick" SelectedItem="{Binding SelectedWeemasItem}">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Background="{Binding BackgroundColor}">
@@ -90,7 +90,7 @@
                         <TextBlock DockPanel.Dock="Left" Margin="2">Search:</TextBlock>
                         <TextBox DockPanel.Dock="Left" Text="{Binding WellmanSearchString, UpdateSourceTrigger=PropertyChanged}"/>
                     </DockPanel>
-                    <ListView DockPanel.Dock="Top" x:Name="WellmanListView" ItemsSource="{Binding FilteredWellmanNames}" SelectionMode="Single" SelectionChanged="WellmanList_SelectionChanged" SelectedItem="{Binding SelectedWellmanItem}">
+                    <ListView DockPanel.Dock="Top" x:Name="WellmanListView" ItemsSource="{Binding FilteredWellmanNames}" SelectionMode="Single" MouseDoubleClick="WellmanListView_MouseDoubleClick" SelectedItem="{Binding SelectedWellmanItem}">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Background="{Binding BackgroundColor}">
