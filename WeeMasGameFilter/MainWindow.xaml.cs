@@ -33,8 +33,6 @@ namespace WeeMasGameFilter
         private ObservableCollection<WeeMasGameEntry> m_WellmanNames;
         private bool m_HideMatched;
 
-        private string m_SearchString;
-
         private WeeMasGameEntry m_SelectedWeemasItem;
         private WeeMasGameEntry m_SelectedWellmanItem;
 
@@ -124,19 +122,6 @@ namespace WeeMasGameFilter
                     m_WellmanNames = value;
                     NotifyPropertyChanged("WellmanNames");
                     NotifyPropertyChanged("FilteredWellmanNames");
-                }
-            }
-        }
-
-        public string SearchString
-        {
-            get { return m_SearchString; }
-            set
-            {
-                if (m_SearchString != value)
-                {
-                    m_SearchString = value;
-                    //TODO: sort according to string alignment
                 }
             }
         }
@@ -662,6 +647,24 @@ namespace WeeMasGameFilter
                 if (FilteredWeemasNames.Count() > 0)
                     WeemasListView.ScrollIntoView(FilteredWeemasNames.First());
             }
+        }
+
+        private void TextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            var searchString = ((System.Windows.Controls.TextBox)sender).Text.ToLower();
+            Comparison<WeeMasGameEntry> containsSubstringSort = delegate(WeeMasGameEntry x, WeeMasGameEntry y)
+            {
+                if (x.Name.Contains(searchString))
+                {
+                    return y.Name.Contains(searchString) ? 0 : -1;
+                }
+                else
+                {
+                    return y.Name.Contains(searchString) ? 1 : 0;
+                }
+            };
+            SortWeemasList(containsSubstringSort);
+            SortWellmanList(containsSubstringSort);
         }
     }
 }

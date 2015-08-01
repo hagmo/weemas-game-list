@@ -4,10 +4,3 @@ Weemas-game-filter anteckningar
 Matcha även alt. titlar tillsammans med namnet. Ibland är de snarare undertitel än alternativ.
 
 Exportera till txt eller kanske csv
-
-En knapp "Remove matched" som döljer matchade.
-
-Fritextsök sorterar listan efter bäst strängmatchning m.a.p. söksträngen. Alltså ingen penalty för "gaps" i spelnamnet, endast för gaps i söksträng. Hoppa även till överst i listan när detta görs.
-
-Commit message
---------------

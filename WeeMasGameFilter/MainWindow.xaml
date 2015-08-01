@@ -80,7 +80,7 @@
         <StackPanel Grid.Row="3">
             <DockPanel Margin="5">
                 <TextBlock DockPanel.Dock="Left" Margin="2">Search:</TextBlock>
-                <TextBox DockPanel.Dock="Right" Text="{Binding SearchString, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox DockPanel.Dock="Right" TextChanged="TextBox_TextChanged"/>
             </DockPanel>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="2">
