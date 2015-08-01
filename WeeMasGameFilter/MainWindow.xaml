@@ -9,6 +9,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
@@ -17,7 +18,7 @@
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0">
+            <StackPanel Grid.Column="0" Margin="5">
                 <TextBlock Text="URL to Winter-een-mas completed games list (Google Spreadsheet):"/>
                 <DockPanel>
                     <Button DockPanel.Dock="Right" Click="DownloadButton_Click">Download data</Button>
@@ -25,7 +26,7 @@
                 </DockPanel>
             </StackPanel>
 
-            <StackPanel Grid.Column="1">
+            <StackPanel Grid.Column="1" Margin="5">
                 <TextBlock Text="Path to Wellman's game collection list:"/>
                 <DockPanel Grid.Column="0">
                     <Button DockPanel.Dock="Right" Click="BrowseButton_Click">Browse...</Button>
@@ -33,88 +34,67 @@
                 </DockPanel>
             </StackPanel>
         </Grid>
-        <Grid Grid.Row="1">
+        
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <TextBlock Text="{Binding NbrOfMatches, StringFormat={}{0} matched games, FallbackValue=0 matched games}" Margin="10,2,10,2"/>
+            <TextBlock Text="{Binding WellmanNames.Count, StringFormat={}{0} Wellman games, FallbackValue=0 Wellman games}" Margin="10,2,10,2"/>
+            <TextBlock Text="{Binding WeemasNames.Count, StringFormat={}{0} Weemas games, FallbackValue=0 Weemas games}" Margin="10,2,10,2"/>
+        </StackPanel>
+        
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
+            <ListView Grid.Column="0" x:Name="WeemasListView" ItemsSource="{Binding FilteredWeemasNames}"
+                              SelectionMode="Single" MouseDoubleClick="WeemasListView_MouseDoubleClick" SelectedItem="{Binding SelectedWeemasItem}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Background="{Binding BackgroundColor}">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0} [{1}]">
+                                    <Binding Path="OriginalName"/>
+                                    <Binding Path="Console"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <ListView Grid.Column="1" x:Name="WellmanListView" ItemsSource="{Binding FilteredWellmanNames}" SelectionMode="Single" MouseDoubleClick="WellmanListView_MouseDoubleClick" SelectedItem="{Binding SelectedWellmanItem}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Background="{Binding BackgroundColor}">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0} [{1}]">
+                                    <Binding Path="OriginalName"/>
+                                    <Binding Path="Console"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
         </Grid>
-        <DockPanel Grid.Row="2">
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-                <Label>
-                    <TextBlock Text="{Binding NbrOfMatches, StringFormat={}{0} matched games, FallbackValue=0 matched games}"/>
-                </Label>
-                <Label>
-                    <TextBlock Text="{Binding WellmanNames.Count, StringFormat={}{0} Wellman games, FallbackValue=0 Wellman games}"/>
-                </Label>
-                <Label>
-                    <TextBlock Text="{Binding WeemasNames.Count, StringFormat={}{0} Weemas games, FallbackValue=0 Weemas games}"/>
-                </Label>
+
+        <StackPanel Grid.Row="3">
+            <DockPanel Margin="5">
+                <TextBlock DockPanel.Dock="Left" Margin="2">Search:</TextBlock>
+                <TextBox DockPanel.Dock="Right" Text="{Binding SearchString, UpdateSourceTrigger=PropertyChanged}"/>
+            </DockPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="2">
+                <Button Click="SortButton_Click" Margin="2" Width="100">Sort</Button>
+                <Button Click="HideMatchedButton_Click" Margin="2" Width="100">Hide matched</Button>
+                <Button Click="ShowMatchedButton_Click" Margin="2" Width="100">Show matched</Button>
             </StackPanel>
-            <Button DockPanel.Dock="Bottom" Height="20" Click="UnmatchSelectedButton_Click">Unmatch selected</Button>
-            <Button DockPanel.Dock="Bottom" Height="20" Click="UnmatchAllButton_Click">Unmatch all</Button>
-            <Button DockPanel.Dock="Bottom" Height="20" Click="MatchSelectedButton_Click">Match selected</Button>
-            <Button DockPanel.Dock="Bottom" Height="50" Margin="0,20,0,0" Click="AutoMatchButton_Click">Auto-match</Button>
-            <Grid DockPanel.Dock="Bottom">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <Button Grid.Column="0" Click="NameSortButton_Click">Sort by name</Button>
-                <Button Grid.Column="1" Click="ConsoleSortButton_Click">Sort by console</Button>
-                <Button Grid.Column="2" Click="MatchSortButton_Click">Sort by matched</Button>
-            </Grid>
-            <Grid DockPanel.Dock="Top">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                
-                <DockPanel Grid.Column="0">
-                    <DockPanel DockPanel.Dock="Bottom">
-                        <TextBlock DockPanel.Dock="Left" Margin="2">Search:</TextBlock>
-                        <TextBox DockPanel.Dock="Left" Text="{Binding WeemasSearchString, UpdateSourceTrigger=PropertyChanged}"/>
-                    </DockPanel>
-                    
-                    <ListView DockPanel.Dock="Top" x:Name="WeemasListView" ItemsSource="{Binding FilteredWeemasNames}" SelectionMode="Single" MouseDoubleClick="WeemasListView_MouseDoubleClick" SelectedItem="{Binding SelectedWeemasItem}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Background="{Binding BackgroundColor}">
-                                    <TextBlock.Text>
-                                        <MultiBinding StringFormat="{}{0} [{1}]">
-                                            <Binding Path="OriginalName"/>
-                                            <Binding Path="Console"/>
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                </DockPanel>
-                
-                <DockPanel Grid.Column="1">
-                    <DockPanel DockPanel.Dock="Bottom">
-                        <TextBlock DockPanel.Dock="Left" Margin="2">Search:</TextBlock>
-                        <TextBox DockPanel.Dock="Left" Text="{Binding WellmanSearchString, UpdateSourceTrigger=PropertyChanged}"/>
-                    </DockPanel>
-                    <ListView DockPanel.Dock="Top" x:Name="WellmanListView" ItemsSource="{Binding FilteredWellmanNames}" SelectionMode="Single" MouseDoubleClick="WellmanListView_MouseDoubleClick" SelectedItem="{Binding SelectedWellmanItem}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Background="{Binding BackgroundColor}">
-                                    <TextBlock.Text>
-                                        <MultiBinding StringFormat="{}{0} [{1}]">
-                                            <Binding Path="OriginalName"/>
-                                            <Binding Path="Console"/>
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                </DockPanel>
-                
-            </Grid>
-        </DockPanel>
+            
+            <StackPanel Margin="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button DockPanel.Dock="Left" Height="50" Width="100" Margin="5" Click="AutoMatchButton_Click">Auto-match</Button>
+                <Button DockPanel.Dock="Right" Height="20" Width="100" Margin="5" Click="MatchSelectedButton_Click" IsEnabled="{Binding CanMatchSelected}">Match selected</Button>
+                <Button DockPanel.Dock="Bottom" Height="20" Width="100" Margin="5" Click="UnmatchSelectedButton_Click" IsEnabled="{Binding CanUnmatchSelected}">Unmatch selected</Button>
+                <Button DockPanel.Dock="Bottom" Height="20" Width="100" Margin="5" Click="UnmatchAllButton_Click">Unmatch all</Button>
+            </StackPanel>
+        </StackPanel>
     </Grid>
 </Window>

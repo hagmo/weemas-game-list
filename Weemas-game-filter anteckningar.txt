@@ -1,11 +1,19 @@
 Weemas-game-filter anteckningar
 ===============================
 
-Strippa textsträngar:
-Ta bort skiljetecken på båda sidor (utom parenteser i Wellmans lista).
-Lagra parentesinnehåll som en alternativ titel.
-Byt ut alla romerska siffror mot arabiska
-Make lowercase
-Ersätt multipla whitespace med ett enda
-
 Matcha även alt. titlar tillsammans med namnet. Ibland är de snarare undertitel än alternativ.
+
+Exportera till txt eller kanske csv
+
+En knapp "sort" som sorterar matchade överst (ena listan i bokstavsordning, den andra i "matchningsordning") och omatchade underst (bokstavsordning).
+
+En knapp "Remove matched" som döljer matchade.
+
+Fritextsök sorterar listan efter bäst strängmatchning m.a.p. söksträngen. Alltså ingen penalty för "gaps" i spelnamnet, endast för gaps i söksträng. Hoppa även till överst i listan när detta görs.
+
+Commit message
+--------------
+Reorganized GUI: more space, hopefully easier to overview.
+Only one sort button (not implemented).
+Hide/show matched buttons.
+Only one search area (not implemented).

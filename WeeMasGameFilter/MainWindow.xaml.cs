@@ -44,8 +44,9 @@ namespace WeeMasGameFilter
 
         private ObservableCollection<WeeMasGameEntry> m_WeemasNames;
         private ObservableCollection<WeeMasGameEntry> m_WellmanNames;
-        private string m_WeemasSearchString;
-        private string m_WellmanSearchString;
+        private bool m_HideMatched;
+
+        private string m_SearchString;
 
         private WeeMasGameEntry m_SelectedWeemasItem;
         private WeeMasGameEntry m_SelectedWellmanItem;
@@ -138,15 +139,15 @@ namespace WeeMasGameFilter
             }
         }
 
-        public string WeemasSearchString
+        public string SearchString
         {
-            get { return m_WeemasSearchString; }
+            get { return m_SearchString; }
             set
             {
-                if (m_WeemasSearchString != value)
+                if (m_SearchString != value)
                 {
-                    m_WeemasSearchString = value;
-                    NotifyPropertyChanged("FilteredWeemasNames");
+                    m_SearchString = value;
+                    //TODO: sort according to string alignment
                 }
             }
         }
@@ -155,29 +156,10 @@ namespace WeeMasGameFilter
         {
             get
             {
-                if (!string.IsNullOrEmpty(m_WeemasSearchString))
-                {
-                    var filteredEntries = m_WeemasNames.Where(e => e.OriginalName.ToLower().Contains(m_WeemasSearchString.ToLower()));
-                    filteredEntries = filteredEntries.Union(m_WeemasNames.Where(e => e.Console.ToLower().Contains(m_WeemasSearchString.ToLower())));
-                    return filteredEntries;
-                }
+                if (m_HideMatched)
+                    return m_WeemasNames.Where(entry => entry.Match == null);
                 else
-                {
                     return m_WeemasNames;
-                }
-            }
-        }
-
-        public string WellmanSearchString
-        {
-            get { return m_WellmanSearchString; }
-            set
-            {
-                if (m_WellmanSearchString != value)
-                {
-                    m_WellmanSearchString = value;
-                    NotifyPropertyChanged("FilteredWellmanNames");
-                }
             }
         }
 
@@ -185,16 +167,10 @@ namespace WeeMasGameFilter
         {
             get
             {
-                if (!string.IsNullOrEmpty(m_WellmanSearchString))
-                {
-                    var filteredEntries = m_WellmanNames.Where(e => e.OriginalName.ToLower().Contains(m_WellmanSearchString.ToLower()));
-                    filteredEntries = filteredEntries.Union(m_WellmanNames.Where(e => e.Console.ToLower().Contains(m_WellmanSearchString.ToLower())));
-                    return filteredEntries;
-                }
+                if (m_HideMatched)
+                    return m_WellmanNames.Where(entry => entry.Match == null);
                 else
-                {
                     return m_WellmanNames;
-                }
             }
         }
 
@@ -215,6 +191,8 @@ namespace WeeMasGameFilter
                 {
                     m_SelectedWeemasItem = value;
                     NotifyPropertyChanged("SelectedWeemasItem");
+                    NotifyPropertyChanged("CanMatchSelected");
+                    NotifyPropertyChanged("CanUnmatchSelected");
                 }
             }
         }
@@ -228,12 +206,40 @@ namespace WeeMasGameFilter
                 {
                     m_SelectedWellmanItem = value;
                     NotifyPropertyChanged("SelectedWellmanItem");
+                    NotifyPropertyChanged("CanMatchSelected");
+                    NotifyPropertyChanged("CanUnmatchSelected");
                 }
+            }
+        }
+
+        public bool CanMatchSelected
+        {
+            get
+            {
+                return SelectedWeemasItem != null && SelectedWellmanItem != null && SelectedWeemasItem.Match == null && SelectedWellmanItem.Match == null;
+            }
+        }
+
+        public bool CanUnmatchSelected
+        {
+            get
+            {
+                return SelectedWeemasItem != null && SelectedWellmanItem != null &&
+                    SelectedWellmanItem.Match != null && SelectedWeemasItem.Match != null &&
+                    SelectedWellmanItem.Match == SelectedWeemasItem && SelectedWeemasItem.Match == SelectedWellmanItem;
             }
         }
 
         private void DownloadButton_Click(object sender, RoutedEventArgs e)
         {
+            if (WeemasNames.Count > 0)
+            {
+                var result = MessageBox.Show("This will clear the list of Wee-mas games, reset all matches and download the data again. Are you sure?",
+                    "Warning", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.No)
+                    return;
+            }
+            
             try
             {
                 Uri uri = new Uri(m_WeeMasURL);
@@ -259,6 +265,8 @@ namespace WeeMasGameFilter
                 WorksheetFeed feed = service.Query(query);
 
                 WeemasNames.Clear();
+                foreach (var entry in WellmanNames)
+                    entry.Match = null;
 
                 WorksheetEntry worksheet = (WorksheetEntry)feed.Entries[0];
 
@@ -289,12 +297,22 @@ namespace WeeMasGameFilter
 
         private void BrowseButton_Click(object sender, RoutedEventArgs e)
         {
+            if (WellmanNames.Count > 0)
+            {
+                var result = MessageBox.Show("This will clear the list of Wellman games, reset all matches and read the data again. Are you sure?",
+                    "Warning", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.No)
+                    return;
+            }
+
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Filter = "Excel OpenXML Files (*.xlsx)|*.xlsx";
             dialog.ShowDialog();
             if (dialog.FileName != null && dialog.FileName != string.Empty)
             {
                 WellmanNames.Clear();
+                foreach (var entry in WeemasNames)
+                    entry.Match = null;
 
                 FileStream stream = null;
                 try
@@ -363,8 +381,21 @@ namespace WeeMasGameFilter
 
         private void AutoMatchButton_Click(object sender, RoutedEventArgs e)
         {
+            if (m_WeemasNames.Any(entry => entry.Match != null) || m_WellmanNames.Any(entry => entry.Match != null))
+            {
+                var result = MessageBox.Show("This will reset all previous matches and attempt to auto-match the lists again. Are you sure?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.No)
+                    return;
+            }
+
             foreach (var entry in m_WeemasNames)
             {
+                if (entry.Match != null)
+                {
+                    entry.Match.Match = null;
+                    entry.Match = null;
+                }
+
                 try
                 {
                     //prioritize console matches
@@ -394,6 +425,8 @@ namespace WeeMasGameFilter
                 }
             }
             NotifyPropertyChanged("NbrOfMatches");
+            NotifyPropertyChanged("CanMatchSelected");
+            NotifyPropertyChanged("CanUnmatchSelected");
         }
 
         private string ParseConsoleName(string s)
@@ -452,44 +485,33 @@ namespace WeeMasGameFilter
 
         private void UnmatchAllButton_Click(object sender, RoutedEventArgs e)
         {
+            var result = MessageBox.Show("This will delete all matchings. Are you sure?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.No)
+                return;
+
             foreach (var entry in WellmanNames)
                 entry.Match = null;
             foreach (var entry in WeemasNames)
                 entry.Match = null;
         }
 
-        private void NameSortButton_Click(object sender, RoutedEventArgs e)
+        private void SortButton_Click(object sender, RoutedEventArgs e)
         {
-            SortLists(delegate(WeeMasGameEntry x, WeeMasGameEntry y)
-            {
-                return x.Name.CompareTo(y.Name);
-            });
+            //TODO
         }
 
-        private void ConsoleSortButton_Click(object sender, RoutedEventArgs e)
+        private void HideMatchedButton_Click(object sender, RoutedEventArgs e)
         {
-            SortLists(delegate(WeeMasGameEntry x, WeeMasGameEntry y)
-            {
-                return x.Console.CompareTo(y.Console);
-            });
+            m_HideMatched = true;
+            NotifyPropertyChanged("FilteredWeemasNames");
+            NotifyPropertyChanged("FilteredWellmanNames");
         }
 
-        private void MatchSortButton_Click(object sender, RoutedEventArgs e)
+        private void ShowMatchedButton_Click(object sender, RoutedEventArgs e)
         {
-            SortLists(delegate(WeeMasGameEntry x, WeeMasGameEntry y)
-            {
-                if (x.Match != null && y.Match == null)
-                    return -1;
-                if (x.Match == null && y.Match != null)
-                    return 1;
-                return 0;
-            });
-        }
-
-        private void SortLists(Comparison<WeeMasGameEntry> comparison)
-        {
-            SortWeemasList(comparison);
-            SortWellmanList(comparison);
+            m_HideMatched = false;
+            NotifyPropertyChanged("FilteredWeemasNames");
+            NotifyPropertyChanged("FilteredWellmanNames");
         }
 
         private void SortWellmanList(Comparison<WeeMasGameEntry> comparison)
@@ -512,20 +534,18 @@ namespace WeeMasGameFilter
 
         private void UnmatchSelectedButton_Click(object sender, RoutedEventArgs e)
         {
-            if (SelectedWeemasItem != null && SelectedWellmanItem != null)
-            {
-                SelectedWeemasItem.Match = null;
-                SelectedWellmanItem.Match = null;
-            }
+            SelectedWeemasItem.Match = null;
+            SelectedWellmanItem.Match = null;
+            NotifyPropertyChanged("CanMatchSelected");
+            NotifyPropertyChanged("CanUnmatchSelected");
         }
 
         private void MatchSelectedButton_Click(object sender, RoutedEventArgs e)
         {
-            if (SelectedWeemasItem != null && SelectedWellmanItem != null)
-            {
-                SelectedWeemasItem.Match = SelectedWellmanItem;
-                SelectedWellmanItem.Match = SelectedWeemasItem;
-            }
+            SelectedWeemasItem.Match = SelectedWellmanItem;
+            SelectedWellmanItem.Match = SelectedWeemasItem;
+            NotifyPropertyChanged("CanMatchSelected");
+            NotifyPropertyChanged("CanUnmatchSelected");
         }
 
         private int StringAlignment(string s1, string s2)
