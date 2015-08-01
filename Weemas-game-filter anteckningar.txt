@@ -5,15 +5,9 @@ Matcha även alt. titlar tillsammans med namnet. Ibland är de snarare undertite
 
 Exportera till txt eller kanske csv
 
-En knapp "sort" som sorterar matchade överst (ena listan i bokstavsordning, den andra i "matchningsordning") och omatchade underst (bokstavsordning).
-
 En knapp "Remove matched" som döljer matchade.
 
 Fritextsök sorterar listan efter bäst strängmatchning m.a.p. söksträngen. Alltså ingen penalty för "gaps" i spelnamnet, endast för gaps i söksträng. Hoppa även till överst i listan när detta görs.
 
 Commit message
 --------------
-Reorganized GUI: more space, hopefully easier to overview.
-Only one sort button (not implemented).
-Hide/show matched buttons.
-Only one search area (not implemented).

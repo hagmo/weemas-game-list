@@ -122,6 +122,7 @@ namespace WeeMasGameFilter
                 {
                     m_WeemasNames = value;
                     NotifyPropertyChanged("WeemasNames");
+                    NotifyPropertyChanged("FilteredWeemasNames");
                 }
             }
         }
@@ -135,6 +136,7 @@ namespace WeeMasGameFilter
                 {
                     m_WellmanNames = value;
                     NotifyPropertyChanged("WellmanNames");
+                    NotifyPropertyChanged("FilteredWellmanNames");
                 }
             }
         }
@@ -497,7 +499,38 @@ namespace WeeMasGameFilter
 
         private void SortButton_Click(object sender, RoutedEventArgs e)
         {
-            //TODO
+            var matchedWeemasEntries = WeemasNames.Where(entry => entry.Match != null).ToList();
+
+            Comparison<WeeMasGameEntry> alphabeticalSort = delegate(WeeMasGameEntry x, WeeMasGameEntry y)
+            {
+                return x.Name.CompareTo(y.Name);
+            };
+
+            matchedWeemasEntries.Sort(alphabeticalSort);
+
+            var sortedWeemasList = new List<WeeMasGameEntry>();
+            var sortedWellmanList = new List<WeeMasGameEntry>();
+            foreach (var weemasEntry in matchedWeemasEntries)
+            {
+                sortedWeemasList.Add(weemasEntry);
+                sortedWellmanList.Add(weemasEntry.Match);
+            }
+
+            var unmatchedWeemasEntries = WeemasNames.Except(matchedWeemasEntries).ToList();
+            unmatchedWeemasEntries.Sort(alphabeticalSort);
+            var unmatchedWellmanEntries = WellmanNames.Where(entry => entry.Match == null).ToList();
+            unmatchedWellmanEntries.Sort(alphabeticalSort);
+            foreach (var weemasEntry in unmatchedWeemasEntries)
+            {
+                sortedWeemasList.Add(weemasEntry);
+            }
+            foreach (var wellmanEntry in unmatchedWellmanEntries)
+            {
+                sortedWellmanList.Add(wellmanEntry);
+            }
+
+            WeemasNames = new ObservableCollection<WeeMasGameEntry>(sortedWeemasList);
+            WellmanNames = new ObservableCollection<WeeMasGameEntry>(sortedWellmanList);
         }
 
         private void HideMatchedButton_Click(object sender, RoutedEventArgs e)
@@ -521,6 +554,7 @@ namespace WeeMasGameFilter
             WellmanNames.Clear();
             foreach (var entry in sorted)
                 WellmanNames.Add(entry);
+            NotifyPropertyChanged("FilteredWellmanNames");
         }
 
         private void SortWeemasList(Comparison<WeeMasGameEntry> comparison)
@@ -530,6 +564,7 @@ namespace WeeMasGameFilter
             WeemasNames.Clear();
             foreach (var entry in sorted)
                 WeemasNames.Add(entry);
+            NotifyPropertyChanged("FilteredWeemasNames");
         }
 
         private void UnmatchSelectedButton_Click(object sender, RoutedEventArgs e)
@@ -602,7 +637,7 @@ namespace WeeMasGameFilter
             }
             else
             {
-                foreach (var wellmanItem in WellmanNames)
+                foreach (var wellmanItem in FilteredWellmanNames)
                 {
                     wellmanItem.StringAligment = StringAlignment(wellmanItem.Name, SelectedWeemasItem.Name);
                 }
@@ -610,8 +645,8 @@ namespace WeeMasGameFilter
                 {
                     return x.StringAligment - y.StringAligment;
                 });
-                if (WellmanNames.Count > 0)
-                    WellmanListView.ScrollIntoView(WellmanNames[0]);
+                if (FilteredWellmanNames.Count() > 0)
+                    WellmanListView.ScrollIntoView(FilteredWellmanNames.First());
             }
         }
 
@@ -629,7 +664,7 @@ namespace WeeMasGameFilter
             }
             else
             {
-                foreach (var weemasItem in WeemasNames)
+                foreach (var weemasItem in FilteredWeemasNames)
                 {
                     weemasItem.StringAligment = StringAlignment(weemasItem.Name, SelectedWellmanItem.Name);
                 }
@@ -637,8 +672,8 @@ namespace WeeMasGameFilter
                 {
                     return x.StringAligment - y.StringAligment;
                 });
-                if (WeemasNames.Count > 0)
-                    WeemasListView.ScrollIntoView(WeemasNames[0]);
+                if (FilteredWeemasNames.Count() > 0)
+                    WeemasListView.ScrollIntoView(FilteredWeemasNames.First());
             }
         }
     }
