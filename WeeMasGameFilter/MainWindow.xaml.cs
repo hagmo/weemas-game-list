@@ -666,5 +666,34 @@ namespace WeeMasGameFilter
             SortWeemasList(containsSubstringSort);
             SortWellmanList(containsSubstringSort);
         }
+
+        private void ExportButton_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog dialog = new SaveFileDialog();
+            dialog.Filter = "Text Files (*.txt)|*.txt";
+            dialog.ShowDialog();
+            if (dialog.FileName != null && dialog.FileName != string.Empty)
+            {
+                bool oldHideMatched = m_HideMatched;
+                m_HideMatched = true;
+
+                try
+                {
+                    using (var writer = new StreamWriter(dialog.FileName))
+                    {
+                        foreach (var entry in FilteredWellmanNames)
+                        {
+                            writer.WriteLine(string.Format("{0} [{1}]", entry.OriginalName, entry.Console));
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(string.Format("Error ({0}) saving file: {1}", ex.ToString(), ex.Message));
+                }
+
+                m_HideMatched = oldHideMatched;
+            }
+        }
     }
 }

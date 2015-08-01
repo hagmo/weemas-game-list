@@ -95,6 +95,7 @@
                 <Button DockPanel.Dock="Bottom" Height="20" Width="100" Margin="5" Click="UnmatchSelectedButton_Click" IsEnabled="{Binding CanUnmatchSelected}">Unmatch selected</Button>
                 <Button DockPanel.Dock="Bottom" Height="20" Width="100" Margin="5" Click="UnmatchAllButton_Click">Unmatch all</Button>
             </StackPanel>
+            <Button HorizontalAlignment="Center" Margin="2" Click="ExportButton_Click">Export unmatched games from Wellman's list</Button>
         </StackPanel>
     </Grid>
 </Window>
