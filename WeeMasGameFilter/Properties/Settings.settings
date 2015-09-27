@@ -1,7 +1,18 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="uri:settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
-  <Settings />
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="WeeMasGameFilter.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="AutoConsoleMatchColor" Type="System.Windows.Media.Color" Scope="User">
+      <Value Profile="(Default)">#FF32CD32</Value>
+    </Setting>
+    <Setting Name="AutoMatchColor" Type="System.Windows.Media.Color" Scope="User">
+      <Value Profile="(Default)">#FF90EE90</Value>
+    </Setting>
+    <Setting Name="ManualConsoleMatchColor" Type="System.Windows.Media.Color" Scope="User">
+      <Value Profile="(Default)">#FF00BFFF</Value>
+    </Setting>
+    <Setting Name="ManualMatchColor" Type="System.Windows.Media.Color" Scope="User">
+      <Value Profile="(Default)">#FF87CEFA</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>

@@ -14,6 +14,7 @@ namespace WeeMasGameFilter
         };
 
         private WeeMasGameEntry m_Match;
+        private bool m_IsManual;
 
         public WeeMasGameEntry(string data, bool fromWellman)
         {
@@ -58,6 +59,18 @@ namespace WeeMasGameFilter
         public string Name { get; set; }
         public string AlternateName { get; set; }
         public string Console { get; set; }
+        public bool IsManual
+        {
+            get { return m_IsManual; }
+            set
+            {
+                if (m_IsManual != value)
+                {
+                    m_IsManual = value;
+                    NotifyPropertyChanged("BackgroundColor");
+                }
+            }
+        }
         public WeeMasGameEntry Match
         {
             get { return m_Match; }
@@ -77,9 +90,9 @@ namespace WeeMasGameFilter
                 if (Match == null)
                     return Brushes.Transparent;
                 else if (Match.Console.ToLower() == Console.ToLower())
-                    return Brushes.LightGreen;
+                    return IsManual ? new SolidColorBrush(Properties.Settings.Default.ManualConsoleMatchColor) : new SolidColorBrush(Properties.Settings.Default.AutoConsoleMatchColor);
                 else
-                    return Brushes.LimeGreen;
+                    return IsManual ? new SolidColorBrush(Properties.Settings.Default.ManualMatchColor) : new SolidColorBrush(Properties.Settings.Default.AutoMatchColor);
             }
         }
         public int StringAligment { get; set; }

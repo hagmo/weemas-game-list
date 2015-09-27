@@ -364,8 +364,10 @@ namespace WeeMasGameFilter
 
             foreach (var entry in m_WeemasNames)
             {
+                entry.IsManual = false;
                 if (entry.Match != null)
                 {
+                    entry.Match.IsManual = false;
                     entry.Match.Match = null;
                     entry.Match = null;
                 }
@@ -500,7 +502,6 @@ namespace WeeMasGameFilter
             {
                 sortedWellmanList.Add(wellmanEntry);
             }
-
             WeemasNames = new ObservableCollection<WeeMasGameEntry>(sortedWeemasList);
             WellmanNames = new ObservableCollection<WeeMasGameEntry>(sortedWellmanList);
         }
@@ -551,6 +552,8 @@ namespace WeeMasGameFilter
         {
             SelectedWeemasItem.Match = SelectedWellmanItem;
             SelectedWellmanItem.Match = SelectedWeemasItem;
+            SelectedWeemasItem.IsManual = true;
+            SelectedWellmanItem.IsManual = true;
             NotifyPropertyChanged("CanMatchSelected");
             NotifyPropertyChanged("CanUnmatchSelected");
         }
